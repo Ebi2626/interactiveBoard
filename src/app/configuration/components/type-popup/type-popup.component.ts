@@ -67,7 +67,7 @@ export class TypePopup {
     const newType: TypeElement = {
       id: self.crypto.randomUUID(),
       color: Math.floor(Math.random() * 16777215).toString(16),
-      name: this.typeForm.get('name')?.value,
+      name: this.typeForm.get('name')!.value,
       inputList: this.inputList.controls.filter((control) => control.value).map((control) => {
         return {
           id: self.crypto.randomUUID(),

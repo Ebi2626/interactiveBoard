@@ -2,6 +2,11 @@
     display: block;
     position: relative;
 
+    .list-item {
+        padding-top: 1.25rem;
+        margin-bottom: 1rem;
+    }
+
     .title-center {
         justify-content: center;
     }
@@ -27,6 +32,7 @@
         transform: translateY(-50%);
         opacity: 0.2;
         transition: 'opacity' ease-in-out 0.3s;
+
         &__list {
             display: flex;
             flex-direction: column;
@@ -38,9 +44,9 @@
 
     &:hover {
         z-index: 10;
+
         .type-options {
             opacity: 1;
         }
     }
 }
-

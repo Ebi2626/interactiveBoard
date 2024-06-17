@@ -11,7 +11,6 @@ export class SettingsService {
   });
 
   updateSettings(newSettings: Partial<Settings>) {
-    console.log('Aktualizujemy ustawienia: ', newSettings);
     this.settings.update((oldSettings) => ({...oldSettings, ...newSettings}));
   }
 }

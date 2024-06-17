@@ -7,6 +7,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { TypeManagementService } from '../../services/type-management.service';
 import { MatButtonModule } from '@angular/material/button';
 import { StoreService } from '../../services/store.service';
+import { ProgramErrors } from '../../../models/settings.model';
 
 @Component({
   selector: 'app-type-choice',
@@ -22,11 +23,13 @@ export class TypeChoiceComponent {
 
   types = this.storeService.types();
 
-  choosenType: string = '';
+  chosenType: string = '';
 
   putTypeOnTheBoard() {
-    if (this.choosenType) {
-      this.typeManagementService.putTypeOnBoard(this.choosenType);
+    if (this.chosenType) {
+      this.typeManagementService.putTypeOnBoard(this.chosenType);
+    } else {
+      throw new Error(ProgramErrors.TYPE_NOT_CHOSE);
     }
   }
 }

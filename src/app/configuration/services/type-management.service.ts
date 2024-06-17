@@ -1,9 +1,8 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { Connection, InputType, TypeElement, TypeOnBoard } from '../../models/type.model';
-import { Subject } from 'rxjs';
-import * as R from 'ramda';
+import { Injectable, inject } from '@angular/core';
+import { InputType, TypeElement, TypeOnBoard } from '../../models/type.model';
 import { ConnectionService } from './connection.service';
 import { StoreService } from './store.service';
+import { ProgramErrors } from '../../models/settings.model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +10,6 @@ import { StoreService } from './store.service';
 export class TypeManagementService {
   private connectionService = inject(ConnectionService);
   private storeService = inject(StoreService);
-  private _currentIndexOnBoard = 0;
-
 
   private copyFieldsWithDiffrentIds(inputTypeList: InputType[]): InputType[] {
     return inputTypeList.map((inputType: InputType) => {
@@ -20,60 +17,65 @@ export class TypeManagementService {
     });
   }
 
-  hideTypeFromTheBoard(indexOfType: number) {
-    console.log('Usuwamy tablicy typ o indexie:', indexOfType);
-    this.storeService.typesOnBoard.update((types) => types.filter((type, i) => i !== indexOfType));
-    this.connectionService.clearConnection(indexOfType);
+  hideTypeFromTheBoard(instanceId: string) {
+    this.connectionService.clearConnection(instanceId);
+    this.storeService.typesOnBoard.update((types) => types.filter((type) => type.instanceId !== instanceId));
   }
 
   putTypeOnBoard(typeId: string) {
     const typeToAddOnBoard = this.storeService.types().find((type) => type.id === typeId);
+
     if (typeToAddOnBoard) {
+
+      // Add unique instanceId and copy inputs with new ids
       const typeWithCopiedFields: TypeOnBoard = {
         ...typeToAddOnBoard,
-        index: this._currentIndexOnBoard,
         inputList: this.copyFieldsWithDiffrentIds(typeToAddOnBoard.inputList),
         instanceId: self.crypto.randomUUID(),
       };
-      console.log('Wstawiamy na tablicę typ: ', typeWithCopiedFields);
+      
       this.storeService.typesOnBoard.update((typesOnBoard) => [...typesOnBoard, { ...typeWithCopiedFields}]);
-      this._currentIndexOnBoard += 1;
+    } else {
+      throw new Error(`${ProgramErrors.LACK_OF_TYPE_ON_BOARD} ${typeId}`);
     }
+
   }
 
   addType(newType: TypeElement) {
-    console.log('Dodajemy typ: ', newType);
     this.storeService.types.update((types) => [...types, newType]);
     this.putTypeOnBoard(newType.id);
   }
 
   removeType(typeId: string) {
-    console.log('Usuwamy typ o id: ', typeId);
-    const indexesToRemove: number[] = [];
-    this.storeService.typesOnBoard().forEach(({ id }, i) => {
-      if (id === typeId) {
-        indexesToRemove.push(i);
-      }
-    });
-    this.storeService.types.update((types) => types.filter((type) => type.id !== typeId));
-    this.storeService.typesOnBoard.update((types) => types.filter((type) => type.id !== typeId));
-    indexesToRemove.sort((a, b) => a - b).forEach((index) => {
-      this.connectionService.clearConnection(index);
+
+    // find all instances with given typeId on the board
+    const instancesToRemove: string[] = this.storeService.typesOnBoard()
+      .filter(({id}) => id === typeId)
+      .map(({instanceId}) => instanceId);
+
+    // Remove connections
+    instancesToRemove.forEach((instanceId) => {
+      this.connectionService.clearConnection(instanceId);
     });
 
+    // Update data
+    this.storeService.types.update((types) => types.filter((type) => type.id !== typeId));
+    this.storeService.typesOnBoard.update((types) => types.filter((type) => type.id !== typeId));
   }
 
   updateType(editedType: TypeElement) {
-    console.log('Aktualizujemy typ: ', editedType);
+    // Edit type template
     this.storeService.types.update((types) => types.map((type) => {
       if (type.id === editedType.id) {
         return { ...editedType };
       }
       return { ...type };
     }));
+
+    // Edit all type instances on the board
     this.storeService.typesOnBoard.update((types) => types.map((type) => {
       if (type.id === editedType.id) {
-        return { ...editedType, index: type.index, instanceId: type.instanceId };
+        return { ...editedType, instanceId: type.instanceId };
       }
       return { ...type };
     }));

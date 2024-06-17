@@ -14,10 +14,9 @@ export interface TypeElement {
 
 export interface TypeOnBoard extends TypeElement {
     instanceId: string;
-    index: number;
 }
 
 export interface Connection {
-    from: number; // indexes on the board
-    to: number;
+    from: string; // instanceId from TypeOnBoard
+    to: string;
 }

@@ -15,3 +15,9 @@ export enum ValidationErrors {
     SAME_TYPE_CONNECTION = 'Connection to the same component is forbidden',
     MAX_CONNECTIONS_NUMBER = 'This type reached max connection number: ',
 }
+
+export enum ProgramErrors {
+    LACK_OF_TYPE_ON_BOARD = 'Lack of the type with id:',
+    LACK_OF_CANVAS_ELEMENT = 'Lack of canvas element',
+    TYPE_NOT_CHOSE = 'You haven\'t choose any type to put on the board',
+}

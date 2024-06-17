@@ -1,9 +1,9 @@
 import { Directive, ElementRef, Inject, Renderer2, effect, inject } from '@angular/core';
 import { Subscription, debounceTime, fromEvent } from 'rxjs';
 import { DOCUMENT } from '@angular/common';
-import { TypeManagementService } from '../services/type-management.service';
 import { Connection } from '../../models/type.model';
 import { ConnectionService } from '../services/connection.service';
+import { ProgramErrors } from '../../models/settings.model';
 
 interface Coords {
   x: number;
@@ -68,9 +68,12 @@ export class DrawingConnectionsDirective {
 
   private drawLine(startingCoords: Coords, endingCoords: Coords) {
     const ctx = this._canvas?.getContext("2d");
-    ctx?.moveTo(startingCoords.x, startingCoords.y)
-    ctx?.lineTo(endingCoords.x, endingCoords.y);
-    ctx?.stroke();
+    if(!ctx) {
+      throw new Error(ProgramErrors.LACK_OF_CANVAS_ELEMENT);
+    }
+    ctx.moveTo(startingCoords.x, startingCoords.y)
+    ctx.lineTo(endingCoords.x, endingCoords.y);
+    ctx.stroke();
   }
 
   private recreateCanvas() {
@@ -91,14 +94,14 @@ export class DrawingConnectionsDirective {
   }
 
   private drawConnection(connection: Connection, appTypeElements: HTMLElement[]) {
-    const startChild = appTypeElements.at(connection.from);
-    const endChild = appTypeElements.at(connection.to);
+    const startChild = appTypeElements.find((el) => el.id === connection.from);
+    const endChild = appTypeElements.find((el) => el.id === connection.to);
     if(startChild && endChild) {
       const startCoords = this.getMidElementCoords(startChild);
       const endCoords = this.getMidElementCoords(endChild);
       this.drawLine(startCoords, endCoords);
     } else {
-      console.error('Wrong connection to draw');
+      throw new Error(`${ProgramErrors.LACK_OF_TYPE_ON_BOARD} ${!startChild ? connection.from : connection.to}`);
     }
   }
 

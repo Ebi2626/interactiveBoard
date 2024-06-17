@@ -1,9 +1,11 @@
 <div appDrawingConnections>
+    @defer() {
     <div class="content">
         @for(type of types(); track type.id) {
-        <app-type [typeContent]="type" [index]="type.index" cdkDrag (cdkDragMoved)="recalculatePaths()"></app-type>
+        <app-type [typeContent]="type" [instaceId]="type.instanceId" [id]="type.instanceId" cdkDrag (cdkDragMoved)="recalculatePaths()"></app-type>
         }
     </div>
+    }
 
     <div class="action-buttons">
         <button class="use-type-btn" mat-raised-button (click)="logData()">Log data</button>

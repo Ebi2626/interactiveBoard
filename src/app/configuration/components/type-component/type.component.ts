@@ -13,7 +13,7 @@ import { TypePopup } from '../type-popup/type-popup.component';
 import { ConnectionService } from '../../services/connection.service';
 
 @Component({
-  selector: 'app-type[typeContent]',
+  selector: 'app-type[instaceId]',
   standalone: true,
   imports: [TypePopup, FormsModule, MatCardModule, MatButton, MatListModule, MatFormFieldModule, MatInputModule, TextFieldModule],
   templateUrl: './type.component.html',
@@ -21,18 +21,20 @@ import { ConnectionService } from '../../services/connection.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TypeComponent {
-  typeManagementService = inject(TypeManagementService)
-  connectionService = inject(ConnectionService);
+  private typeManagementService = inject(TypeManagementService)
+  private connectionService = inject(ConnectionService);
+  private dialog = inject(MatDialog);
+  
   typeContent = input<TypeElement>();
-  index = input<number>(0);
+  instaceId = input<string>();
   name: string = '';
-  readonly dialog = inject(MatDialog);
 
   ngOnInit() {
     this.name = this.typeContent()!.name;
   }
 
   updateValue(value: any, inputId: string) {
+
     const newInputList = this.typeContent()!.inputList.map((field) => {
       if (field.id === inputId) {
         return {
@@ -42,15 +44,17 @@ export class TypeComponent {
       }
       return field;
     });
+
     const updatedType: TypeElement = {
       ...this.typeContent()!,
       inputList: newInputList,
     };
+
     this.typeManagementService.updateType(updatedType);
   }
 
   addConnection() {
-    this.connectionService.addConnection(this.index());
+    this.connectionService.addConnection(this.instaceId() as string);
   }
 
   editContent() {
@@ -62,7 +66,7 @@ export class TypeComponent {
   }
 
   hideType() {
-    this.typeManagementService.hideTypeFromTheBoard(this.index());
+    this.typeManagementService.hideTypeFromTheBoard(this.instaceId() as string);
   }
 
 }
