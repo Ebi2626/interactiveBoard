@@ -1,0 +1,16 @@
+<h2 mat-dialog-title>Choose type to place on the board</h2>
+<mat-dialog-content>
+  <mat-form-field style="width: 100%;">
+    <mat-label>Type to add on the board</mat-label>
+    <mat-select [(ngModel)]="choosenType">
+      @for (type of types; track type.id) {
+      <mat-option [value]="type.id">{{type.name}}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close (click)="putTypeOnTheBoard()" [disabled]="!choosenType">Put type on the
+    board</button>
+  <button mat-button mat-dialog-close>Close</button>
+</mat-dialog-actions>

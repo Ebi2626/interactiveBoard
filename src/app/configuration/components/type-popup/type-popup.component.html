@@ -1,0 +1,35 @@
+<h2 mat-dialog-title>{{formData ? 'Edit ' : 'Add new' }} type</h2>
+<mat-dialog-content>
+    <form [formGroup]="typeForm">
+        <mat-list role="list">
+            <mat-list-item style="height: auto;" role="listitem">
+                <mat-form-field>
+                    <mat-label>Name:</mat-label>
+                    <input formControlName="name" matInput>
+                </mat-form-field>
+            </mat-list-item>
+            <div formArrayName="inputList">
+                @for(field of inputList.controls; track field; let i = $index) {
+                <mat-list-item style="height: auto;" role="listitem">
+                    <mat-form-field>
+                        <mat-label>Field {{ i + 1 }} label:</mat-label>
+                        <input [formControlName]="i" matInput>
+                    </mat-form-field>
+                    <button class="delete-btn" mat-fab aria-label="Delete field" (click)="removeField(i)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </mat-list-item>
+                }
+            </div>
+        </mat-list>
+        <button mat-button (click)="addField()">Add input</button>
+    </form>
+</mat-dialog-content>
+<mat-dialog-actions>
+    @if(formData){
+    <button mat-button mat-dialog-close (click)="updateType()">Update type</button>
+    } @else {
+    <button mat-button mat-dialog-close (click)="addNewType()">Submit new type</button>
+    }
+    <button mat-button mat-dialog-close>Close</button>
+</mat-dialog-actions>

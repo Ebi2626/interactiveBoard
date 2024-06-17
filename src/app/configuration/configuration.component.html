@@ -1,0 +1,12 @@
+<div>
+    <div class="content">
+        @for(type of types(); track type.id) {
+        <app-type [typeContent]="type" [index]="type.index" cdkDrag (cdkDragMoved)="recalculatePaths()"></app-type>
+        }
+    </div>
+
+    <div class="action-buttons">
+        <button class="add-type-btn" mat-raised-button (click)="addNewType()">+ Add new type</button>
+        <button class="use-type-btn" mat-raised-button (click)="useType()">+ Use existing type</button>
+    </div>
+</div>
