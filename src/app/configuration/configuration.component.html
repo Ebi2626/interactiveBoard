@@ -1,4 +1,4 @@
-<div>
+<div appDrawingConnections>
     <div class="content">
         @for(type of types(); track type.id) {
         <app-type [typeContent]="type" [index]="type.index" cdkDrag (cdkDragMoved)="recalculatePaths()"></app-type>

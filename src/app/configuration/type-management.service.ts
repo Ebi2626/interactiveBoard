@@ -1,5 +1,7 @@
 import { Injectable, signal } from '@angular/core';
-import { Connection, TypeElement, TypeOnBoard } from '../models/type.model';
+import { Connection, InputType, TypeElement, TypeOnBoard } from '../models/type.model';
+import { Subject } from 'rxjs';
+import * as R from 'ramda';
 
 @Injectable({
   providedIn: 'root'
@@ -10,11 +12,19 @@ export class TypeManagementService {
 
   private _currentIndexOnBoard = 0;
 
+  public redrawConnections: Subject<void> = new Subject();
+
   connections = signal<Connection[]>([]);
 
   types = signal<TypeElement[]>([]);
 
   typesOnBoard = signal<TypeOnBoard[]>([]);
+
+  private copyFieldsWithDiffrentIds(inputTypeList: InputType[]): InputType[] {
+    return inputTypeList.map((inputType: InputType) => {
+      return { ...inputType, id: self.crypto.randomUUID()}
+    });
+  }
 
   hideTypeFromTheBoard(indexOfType: number) {
     console.log('Usuwamy tablicy typ o indexie:', indexOfType);
@@ -25,8 +35,12 @@ export class TypeManagementService {
   putTypeOnBoard(typeId: string) {
     const typeToAddOnBoard = this.types().find((type) => type.id === typeId);
     if (typeToAddOnBoard) {
-      console.log('Wstawiamy na tablicę typ: ', typeToAddOnBoard);
-      this.typesOnBoard.update((typesOnBoard) => [...typesOnBoard, { ...typeToAddOnBoard, index: this._currentIndexOnBoard }]);
+      const typeWithCopiedFields: TypeElement = {
+        ...typeToAddOnBoard,
+        inputList: this.copyFieldsWithDiffrentIds(typeToAddOnBoard.inputList),
+      };
+      console.log('Wstawiamy na tablicę typ: ', typeWithCopiedFields);
+      this.typesOnBoard.update((typesOnBoard) => [...typesOnBoard, { ...typeWithCopiedFields, index: this._currentIndexOnBoard }]);
       this._currentIndexOnBoard += 1;
     }
 
@@ -83,10 +97,10 @@ export class TypeManagementService {
       const secondTypeId = this.typesOnBoard().find((el) => el.index === typeIndex)?.id;
       const isValidConnection = this.isConnectionValid(firstTypeId, secondTypeId);
       if (isValidConnection) {
-        this.connections.update((connections) => Array.from(new Set([...connections, { from: this._from!, to: typeIndex }])));
+        this.connections.update((connections) => R.uniq([...connections, { from: this._from!, to: typeIndex }]));
         console.log('Zaktualizowana lista połączeń: ', this.connections());
       } else {
-        console.error('Invalid connection');
+        console.error('Nie można połączyć elementów o tych samych id');
       }
       this._from = null;
     } else {
@@ -96,6 +110,6 @@ export class TypeManagementService {
 
   clearConnection(indexToRemove: number) {
     console.log('usuwamy połączenia z indexem: ', indexToRemove);
-    this.connections.update((connections) => Array.from(new Set(connections.filter(({ from, to }) => from !== indexToRemove && to !== indexToRemove))));
+    this.connections.update((connections) => R.uniq(connections.filter(({ from, to }) => from !== indexToRemove && to !== indexToRemove)));
   }
 }
