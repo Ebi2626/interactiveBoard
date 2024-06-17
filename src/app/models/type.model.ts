@@ -13,6 +13,7 @@ export interface TypeElement {
 }
 
 export interface TypeOnBoard extends TypeElement {
+    instanceId: string;
     index: number;
 }
 

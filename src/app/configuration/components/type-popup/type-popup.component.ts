@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, inject } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import {
@@ -9,36 +9,32 @@ import {
   MatDialogContent,
   MatDialogTitle,
 } from '@angular/material/dialog';
-import { TypeManagementService } from '../../type-management.service';
+import { TypeManagementService } from '../../services/type-management.service';
 import { TypeElement } from '../../../models/type.model';
 import { MatListModule } from '@angular/material/list';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
+import { StoreService } from '../../services/store.service';
 
 @Component({
   selector: 'app-popup',
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule, MatIconModule, MatFormFieldModule, MatInputModule, MatListModule, MatButtonModule, MatDialogTitle, MatDialogActions, MatDialogClose, MatDialogContent],
   templateUrl: './type-popup.component.html',
-  styleUrl: './type-popup.component.scss'
+  styleUrl: './type-popup.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TypePopup {
   typeManagementService = inject(TypeManagementService)
+  storeService = inject(StoreService);
   typeForm: FormGroup;
 
   constructor(private fb: FormBuilder, @Inject(MAT_DIALOG_DATA) public formData: TypeElement) {
-    if (formData) {
       this.typeForm = this.fb.group({
-        name: this.fb.control(formData.name),
-        inputList: this.fb.array(formData.inputList.map((item) => this.fb.control(item.label)))
+        name: this.fb.control(formData?.name || ''),
+        inputList: this.fb.array(formData?.inputList?.length ? formData.inputList.map((item) => this.fb.control(item.label)) : [])
       });
-    } else {
-      this.typeForm = this.fb.group({
-        name: this.fb.control(''),
-        inputList: this.fb.array([this.fb.control('')])
-      });
-    }
   }
 
   get inputList() {
@@ -79,7 +75,7 @@ export class TypePopup {
           value: '',
         }
       }),
-      typeNumber: this.typeManagementService.types().length + 1
+      typeNumber: this.storeService.types().length + 1
     };
     this.typeManagementService.addType(newType)
   }

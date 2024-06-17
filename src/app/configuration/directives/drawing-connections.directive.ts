@@ -1,8 +1,9 @@
 import { Directive, ElementRef, Inject, Renderer2, effect, inject } from '@angular/core';
 import { Subscription, debounceTime, fromEvent } from 'rxjs';
 import { DOCUMENT } from '@angular/common';
-import { TypeManagementService } from '../type-management.service';
+import { TypeManagementService } from '../services/type-management.service';
 import { Connection } from '../../models/type.model';
+import { ConnectionService } from '../services/connection.service';
 
 interface Coords {
   x: number;
@@ -22,7 +23,7 @@ export class DrawingConnectionsDirective {
   private _elementRef = inject(ElementRef);
   private _canvas?: HTMLCanvasElement;
   private _canvasStyle: string = 'position: absolute; top: 0; left: 0; z-index: -1;';
-  private _typeManagementService: TypeManagementService = inject(TypeManagementService);
+  private _connectionsService = inject(ConnectionService);
 
   constructor(@Inject(DOCUMENT) private document: Document) {
     this._document = document;
@@ -44,7 +45,7 @@ export class DrawingConnectionsDirective {
 
     // Redraw connections on drag'n'drop
     this._sub.add(
-      this._typeManagementService.redrawConnections.pipe(debounceTime(30)).subscribe(() => {
+      this._connectionsService.redrawConnections.pipe(debounceTime(30)).subscribe(() => {
         this.redrawConnections();
       })
     )
@@ -104,7 +105,7 @@ export class DrawingConnectionsDirective {
   public redrawConnections() {
     this.recreateCanvas();
     const appTypeElements = Array.from(this._document.querySelectorAll('app-type')) as HTMLElement[];
-    this._typeManagementService.connections().forEach((connection) => {
+    this._connectionsService.connections().forEach((connection) => {
       this.drawConnection(connection, appTypeElements);
     })
   }

@@ -1,0 +1,15 @@
+<h2 mat-dialog-title>Board settings</h2>
+<mat-dialog-content>
+    @if(form) {
+        <form [formGroup]="form">
+            <mat-form-field>
+                <mat-label>Maximum connection number:</mat-label>
+                <input formControlName="maxConnectionNumber" matInput>
+            </mat-form-field>
+        </form>
+    }
+</mat-dialog-content>
+<mat-dialog-actions>
+    <button mat-button mat-dialog-close (click)="saveSettings()">Save</button>
+    <button mat-button mat-dialog-close>Close</button>
+</mat-dialog-actions>
