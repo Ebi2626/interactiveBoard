@@ -1,27 +1,37 @@
 # MyTimePlan
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.7.
+Simple application to create type connection view on the board in the browser.
+It has been deployed to github-pages and live preview is avialable (here)[https://ebi2626.github.io/myTimePlan/].
 
-## Development server
+## Usage
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+Main functionalities:
+- creating types
+- manage types on the board (location and visible instances)
+- connect types
+- define max connection of type
+- preview data in the console
 
-## Code scaffolding
+On the main board there are 4 buttons:
+- Log data - allow us to display data in the console to verify is everything works well behind the scene
+- Settings - allow us to define maximum connection number between types (it could be extended in the future)
+- Use existing type - allow us to put on the board one of already created types
+- Add new type - allow us to define new typ and automatically put it on the board
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+### Type
+Each created object we are calling "type", because it's structure representing some type in object-oriented programming manner.
+Each type includes of:
+- id - unique value to identify it
+- name - field for name of the type (used in "Use existing type" popup)
+- fields - list of custom fields added by the user with given names
 
-## Build
+### Type on the board
+Types on the board aren't the same as types described above. When we are working with board, we aren't using created types directly,
+because they are some kind of "templates" for type instances located on the board. It allow us to place few instances of the same type
+on the board in the same time. Beside values and fields inherited from "Type" structure, type on the board includes of:
+- instanceId - unique value to recognize different instances of the same type on the board
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+## Development info
+- Angular version 17.3.7
+- Node version 20.13.1
+- NPM version 10.5.2
