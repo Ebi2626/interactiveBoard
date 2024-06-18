@@ -1,16 +1,33 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { Settings } from '../../models/settings.model';
+import { LocalStorageService } from '../../global/services/local-storage.service';
+import { LocalStorageKey } from '../../models/localStorage.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SettingsService {
-  settings = signal<Settings>({
+  private localStorageService = inject(LocalStorageService);
+
+  public settings = signal<Settings>({
     maxConnectionNumber: null,
     allowedSelfConnection: false,
+    saveDataInLocalStorage: false,
   });
 
-  updateSettings(newSettings: Partial<Settings>) {
-    this.settings.update((oldSettings) => ({...oldSettings, ...newSettings}));
+  constructor() {
+    const settingsFromLocalStorage = this.localStorageService.getItem(LocalStorageKey.SETTINGS);
+    if (settingsFromLocalStorage) {
+      this.updateSettings(settingsFromLocalStorage);
+    }
+  }
+
+  public updateSettings(newSettings: Partial<Settings>): void {
+    this.settings.update((oldSettings) => ({ ...oldSettings, ...newSettings }));
+    if (newSettings.saveDataInLocalStorage) {
+      this.localStorageService.setItem(LocalStorageKey.SETTINGS, this.settings());
+    } else {
+      this.localStorageService.clear();
+    }
   }
 }

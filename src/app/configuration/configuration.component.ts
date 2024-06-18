@@ -1,5 +1,4 @@
-import { Component, ElementRef, QueryList, ViewChildren, computed, effect, inject } from '@angular/core';
-import { TypeManagementService } from './services/type-management.service';
+import { ChangeDetectionStrategy, Component, ElementRef, QueryList, ViewChildren, effect, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { TypeComponent } from './components/type-component/type.component';
@@ -11,42 +10,82 @@ import { SettingsPopupComponent } from './components/settings-popup/settings-pop
 import { LoggerService } from './services/logger.service';
 import { ConnectionService } from './services/connection.service';
 import { StoreService } from './services/store.service';
+import { PositionService } from './services/position.service';
 
 @Component({
   selector: 'app-configuration',
   standalone: true,
   imports: [MatButtonModule, TypeComponent, CdkDrag, DrawingConnectionsDirective],
   templateUrl: './configuration.component.html',
-  styleUrl: './configuration.component.scss'
+  styleUrl: './configuration.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConfigurationComponent {
   readonly dialog = inject(MatDialog);
-  typeManagementService = inject(TypeManagementService);
-  connectionService = inject(ConnectionService);
-  loggerService = inject(LoggerService);
-  storeService = inject(StoreService);
-  types = this.storeService.typesOnBoard;
-  connections = this.connectionService.connections;
+  private connectionService = inject(ConnectionService);
+  private loggerService = inject(LoggerService);
+  private storeService = inject(StoreService);
+  private _positionService = inject(PositionService);
+  private positionSettled = signal<boolean>(false);
+  private componentInitialized = signal<boolean>(false);
+  public types = this.storeService.typesOnBoard;
+  public connections = this.connectionService.connections;
 
-  @ViewChildren(TypeComponent, { read: ElementRef }) typesOnTheBoard: QueryList<ElementRef<TypeComponent>> | undefined;
+  @ViewChildren(TypeComponent, { read: ElementRef }) typesOnTheBoard: QueryList<ElementRef<HTMLElement>> | undefined;
 
-  addNewType() {
+  constructor() {
+    effect(() => {
+      if (this.types() && this.componentInitialized() && !this.positionSettled()) {
+        // TODO: refactor logic so we could avoid this time for rendering children
+        setTimeout(() => {
+          this.setComponentsPositions();
+        }, 100)
+      }
+    })
+  }
+
+  public addNewType(): void {
     this.dialog.open(TypePopup);
   }
 
-  useType() {
+  public useType(): void {
     this.dialog.open(TypeChoiceComponent);
   }
 
-  openSettings() {
+  public openSettings(): void {
     this.dialog.open(SettingsPopupComponent);
   }
 
-  recalculatePaths() {
+  public recalculatePaths(): void {
     this.connectionService.redrawConnections.next();
   }
 
-  logData() {
+  public logData(): void {
     this.loggerService.logAllData();
+  }
+
+  public saveComponentPosition(instanceId: string): void {
+    const htmlElement = Array.from(this.typesOnTheBoard!).find((el) => el.nativeElement.id === instanceId)?.nativeElement;
+    const transformStyle = htmlElement?.style?.transform;
+    if (htmlElement && transformStyle) {
+      this._positionService.setPosition(instanceId, `transform: ${transformStyle}`);
+    }
+  }
+
+  private setComponentsPositions(): void {
+    const positions = this._positionService.positions();
+    const elements = Array.from(this.typesOnTheBoard!);
+    for (const id in positions) {
+      const element = elements.find((el) => el.nativeElement.id === id);
+      if (element) {
+        element.nativeElement.setAttribute('style', positions[id]);
+      }
+    }
+    this.recalculatePaths();
+    this.positionSettled.update(() => true);
+  }
+
+  ngAfterViewInit(): void {
+    this.componentInitialized.update(() => true);
   }
 }

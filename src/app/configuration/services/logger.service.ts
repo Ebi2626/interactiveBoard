@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { SettingsService } from './settings.service';
 import { ConnectionService } from './connection.service';
 import { StoreService } from './store.service';
+import { PositionService } from './position.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +11,7 @@ export class LoggerService {
   private storeService = inject(StoreService);
   private settingService = inject(SettingsService);
   private connectionService = inject(ConnectionService);
+  private positionService = inject(PositionService);
 
   private logTypesData() {
     console.group('_____ Types information _____');
@@ -21,6 +23,10 @@ export class LoggerService {
     console.group('___ All types on the board ___');
     console.log(this.storeService.typesOnBoard());
     console.groupEnd();
+
+    console.group('___ Type number ___')
+    console.log(this.storeService.typeNumber());
+    console.groupEnd()
 
     console.groupEnd();
   }
@@ -39,12 +45,19 @@ export class LoggerService {
     console.groupEnd();
   }
 
+  private logPositionData() {
+    console.group('_____ Positions information ______');
+    console.log(this.positionService.positions());
+    console.groupEnd();
+  }
+
   public logAllData() {
 
     console.log('Logging time: ', Date());
 
     this.logTypesData();
     this.logConnectionsData();
+    this.logPositionData();
     this.logSettingsData();
 
     

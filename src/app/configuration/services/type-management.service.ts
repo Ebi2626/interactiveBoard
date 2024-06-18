@@ -17,12 +17,12 @@ export class TypeManagementService {
     });
   }
 
-  hideTypeFromTheBoard(instanceId: string) {
+  public hideTypeFromTheBoard(instanceId: string): void {
     this.connectionService.clearConnection(instanceId);
     this.storeService.typesOnBoard.update((types) => types.filter((type) => type.instanceId !== instanceId));
   }
 
-  putTypeOnBoard(typeId: string) {
+  public putTypeOnBoard(typeId: string): void {
     const typeToAddOnBoard = this.storeService.types().find((type) => type.id === typeId);
 
     if (typeToAddOnBoard) {
@@ -41,12 +41,13 @@ export class TypeManagementService {
 
   }
 
-  addType(newType: TypeElement) {
+  public addType(newType: TypeElement): void {
     this.storeService.types.update((types) => [...types, newType]);
+    this.storeService.typeNumber.update((oldTypeNumber) => oldTypeNumber + 1);
     this.putTypeOnBoard(newType.id);
   }
 
-  removeType(typeId: string) {
+  public removeType(typeId: string): void {
 
     // find all instances with given typeId on the board
     const instancesToRemove: string[] = this.storeService.typesOnBoard()
@@ -63,7 +64,7 @@ export class TypeManagementService {
     this.storeService.typesOnBoard.update((types) => types.filter((type) => type.id !== typeId));
   }
 
-  updateType(editedType: TypeElement) {
+  public updateType(editedType: TypeElement): void {
     // Edit type template
     this.storeService.types.update((types) => types.map((type) => {
       if (type.id === editedType.id) {

@@ -26,30 +26,30 @@ import { StoreService } from '../../services/store.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TypePopup {
-  typeManagementService = inject(TypeManagementService)
-  storeService = inject(StoreService);
-  typeForm: FormGroup;
+  private typeManagementService = inject(TypeManagementService)
+  private storeService = inject(StoreService);
+  public typeForm: FormGroup;
 
   constructor(private fb: FormBuilder, @Inject(MAT_DIALOG_DATA) public formData: TypeElement) {
-      this.typeForm = this.fb.group({
-        name: this.fb.control(formData?.name || ''),
-        inputList: this.fb.array(formData?.inputList?.length ? formData.inputList.map((item) => this.fb.control(item.label)) : [])
-      });
+    this.typeForm = this.fb.group({
+      name: this.fb.control(formData?.name || ''),
+      inputList: this.fb.array(formData?.inputList?.length ? formData.inputList.map((item) => this.fb.control(item.label)) : [])
+    });
   }
 
-  get inputList() {
+  public get inputList(): FormArray {
     return this.typeForm.get('inputList') as FormArray;
   }
 
-  addField() {
+  public addField(): void {
     this.inputList.push(this.fb.control(''));
   }
 
-  removeField(index: number) {
+  public removeField(index: number): void {
     this.inputList.removeAt(index);
   }
 
-  updateType() {
+  public updateType(): void {
     const updatedType: TypeElement = {
       ...this.formData,
       inputList: this.inputList.controls.map((control) => {
@@ -63,7 +63,7 @@ export class TypePopup {
     this.typeManagementService.updateType(updatedType)
   }
 
-  addNewType() {
+  public addNewType(): void {
     const newType: TypeElement = {
       id: self.crypto.randomUUID(),
       color: Math.floor(Math.random() * 16777215).toString(16),
@@ -75,7 +75,7 @@ export class TypePopup {
           value: '',
         }
       }),
-      typeNumber: this.storeService.types().length + 1
+      typeNumber: this.storeService.typeNumber() + 1
     };
     this.typeManagementService.addType(newType)
   }
