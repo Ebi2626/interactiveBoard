@@ -1,7 +1,7 @@
 # MyTimePlan
 
 Simple application to create type connection view on the board in the browser.
-It has been deployed to github-pages and live preview is avialable (here)[https://ebi2626.github.io/myTimePlan/].
+It has been deployed to github-pages and live preview is avialable [here](https://ebi2626.github.io/myTimePlan/).
 
 ## Usage
 
